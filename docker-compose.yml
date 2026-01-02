@@ -42,14 +42,14 @@ services:
   otel-collector:
     image: otel/opentelemetry-collector-contrib:latest
     container_name: otel-collector
-    command: [--config=/etc/otelcol/config.yaml]
+    command: [--config=/config/config.yaml]
     ports:
       - "8888:8888"   # Métricas Prometheus format (para scrape)
       - "8889:8889"   # Métricas Prometheus format alternativo
       - "4317:4317"   # OTLP gRPC (para receber métricas/traces da aplicação)
       - "4318:4318"   # OTLP HTTP (para receber métricas/traces da aplicação)
     volumes:
-      - ./otel-collector-config.yaml:/etc/otelcol/config.yaml:ro
+      - ./otel-collector-config.yaml:/config/config.yaml:ro
     networks:
       - monitoring
     depends_on:
