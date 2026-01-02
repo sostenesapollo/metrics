@@ -7,8 +7,7 @@ services:
       POSTGRES_DB: monitoring
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres  # Mude em prod!
-    ports:
-      - "5432:5432"
+    # Porta não exposta - acesso apenas via rede Docker interna
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./postgres-exporter.yml:/etc/postgres-exporter.yml  # Opcional exporter
