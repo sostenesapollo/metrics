@@ -17,6 +17,11 @@ scrape_configs:
     static_configs:
       - targets: ['otel-collector:8889']
   
+  - job_name: 'node-exporter'
+    scrape_interval: 15s
+    static_configs:
+      - targets: ['node-exporter:9100']
+  
   # Job do pedegas-3 comentado - as métricas são enviadas via OTLP para o otel-collector
   # e aparecem no job 'otel-collector' acima
   # - job_name: 'pedegas-3'
