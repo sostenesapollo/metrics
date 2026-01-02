@@ -16,7 +16,6 @@ services:
     # Porta não exposta - acesso apenas via rede Docker interna
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./postgres-exporter.yml:/etc/postgres-exporter.yml  # Opcional exporter
     networks:
       - monitoring
     restart: unless-stopped
