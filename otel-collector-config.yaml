@@ -17,10 +17,10 @@ processors:
     check_interval: 1s
 
 exporters:
-  # Exporter Prometheus - expõe métricas no formato Prometheus na porta 8888
+  # Exporter Prometheus - expõe métricas no formato Prometheus na porta 8889
   # O Prometheus vai fazer scrape desta porta
   prometheus:
-    endpoint: "0.0.0.0:8888"
+    endpoint: "0.0.0.0:8889"
   
   # Opcional: Enviar métricas diretamente para Prometheus via remote write
   # prometheusremotewrite:
