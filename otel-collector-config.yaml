@@ -1,0 +1,45 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: 'otel-collector'
+          scrape_interval: 10s
+          static_configs:
+            - targets: ['0.0.0.0:8888']
+        - job_name: 'remix-app'
+          scrape_interval: 15s
+          static_configs:
+            - targets: ['host.docker.internal:3000']  # Ajuste IP/porta do seu app
+          metrics_path: '/metrics'
+        - job_name: 'postgres-exporter'
+          scrape_interval: 15s
+          static_configs:
+            - targets: ['postgres-exporter:9187']
+
+processors:
+  batch: {}
+  memory_limiter:
+    limit_mib: 2000  # Limite memória collector
+
+exporters:
+  prometheus:
+    endpoint: "0.0.0.0:8889"
+  prometheusremotewrite:
+    endpoint: "http://prometheus:9090/api/v1/write"
+
+extensions:
+  health_check: {}
+
+service:
+  extensions: [health_check]
+  pipelines:
+    metrics:
+      receivers: [otlp, prometheus]
+      processors: [memory_limiter, batch]
+      exporters: [prometheus, prometheusremotewrite]
