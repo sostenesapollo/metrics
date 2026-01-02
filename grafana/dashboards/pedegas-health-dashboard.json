@@ -581,12 +581,12 @@
             "type": "prometheus",
             "uid": "ff8wumiwg41dsc"
           },
-          "expr": "sum(rate(prometheus_http_requests_total[5m])) by (code, handler)",
-          "legendFormat": "{{code}} - {{handler}}",
+          "expr": "pg_stat_database_numbackends{job=\"postgres-exporter\",datname=~\"monitoring|pedegas\"}",
+          "legendFormat": "{{datname}}",
           "refId": "A"
         }
       ],
-      "title": "🌐 HTTP Requests Prometheus (req/s)",
+      "title": "🗄️ PostgreSQL - Conexões Ativas por Database",
       "type": "timeseries"
     },
     {
@@ -606,7 +606,7 @@
             "axisPlacement": "auto",
             "barAlignment": 0,
             "drawStyle": "line",
-            "fillOpacity": 10,
+            "fillOpacity": 20,
             "gradientMode": "none",
             "hideFrom": {
               "tooltip": false,
@@ -636,18 +636,10 @@
               {
                 "color": "green",
                 "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 500
-              },
-              {
-                "color": "red",
-                "value": 1000
               }
             ]
           },
-          "unit": "ms"
+          "unit": "decbytes"
         },
         "overrides": []
       },
@@ -679,12 +671,12 @@
             "type": "prometheus",
             "uid": "ff8wumiwg41dsc"
           },
-          "expr": "histogram_quantile(0.95, sum(rate(prometheus_http_request_duration_seconds_bucket[5m])) by (le, handler)) * 1000",
-          "legendFormat": "{{handler}}",
+          "expr": "pg_database_size_bytes{job=\"postgres-exporter\",datname=~\"monitoring|pedegas\"}",
+          "legendFormat": "{{datname}}",
           "refId": "A"
         }
       ],
-      "title": "⏱️ HTTP Request Duration Prometheus - P95 (ms)",
+      "title": "💾 PostgreSQL - Tamanho dos Databases",
       "type": "timeseries"
     },
     {
@@ -772,13 +764,13 @@
             "type": "prometheus",
             "uid": "ff8wumiwg41dsc"
           },
-          "expr": "topk(10, node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / 1024 / 1024",
+          "expr": "topk(10, pg_stat_database_numbackends{job=\"postgres-exporter\",datname=~\"monitoring|pedegas\"})",
           "format": "table",
           "instant": true,
           "refId": "A"
         }
       ],
-      "title": "🔍 Top 10 Uso de Memória (MB) - Sistema",
+      "title": "🔍 Top 10 Databases por Conexões Ativas",
       "type": "table"
     },
     {
@@ -831,7 +823,7 @@
               }
             ]
           },
-          "unit": "reqps"
+          "unit": "ops"
         },
         "overrides": []
       },
@@ -866,9 +858,18 @@
           "expr": "sum(rate(pg_stat_database_xact_commit{job=\"postgres-exporter\",datname=~\"monitoring|pedegas\"}[5m])) by (datname)",
           "legendFormat": "Commits - {{datname}}",
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ff8wumiwg41dsc"
+          },
+          "expr": "sum(rate(pg_stat_database_xact_rollback{job=\"postgres-exporter\",datname=~\"monitoring|pedegas\"}[5m])) by (datname)",
+          "legendFormat": "Rollbacks - {{datname}}",
+          "refId": "B"
         }
       ],
-      "title": "📈 Transações PostgreSQL por Database (ops/s)",
+      "title": "📈 PostgreSQL - Commits e Rollbacks por Database (ops/s)",
       "type": "timeseries"
     },
     {
@@ -1068,12 +1069,12 @@
             "type": "prometheus",
             "uid": "ff8wumiwg41dsc"
           },
-          "expr": "histogram_quantile(0.95, sum(rate(go_gc_duration_seconds_bucket[5m])) by (le, job)) * 1000",
-          "legendFormat": "GC Duration - {{job}}",
+          "expr": "sum(pg_locks_count{job=\"postgres-exporter\"}) by (mode)",
+          "legendFormat": "{{mode}}",
           "refId": "A"
         }
       ],
-      "title": "⏰ GC Duration por Job (P95) - Go Runtime",
+      "title": "📊 PostgreSQL - Locks por Tipo",
       "type": "timeseries"
     },
     {
@@ -1163,7 +1164,7 @@
           "refId": "A"
         }
       ],
-      "title": "✅ GC Cycles Automáticos por Job",
+      "title": "📈 PostgreSQL - I/O por Database",
       "type": "timeseries"
     },
     {
@@ -1207,26 +1208,16 @@
             }
           },
           "mappings": [],
-          "max": 100,
-          "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
                 "color": "green",
                 "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 1
-              },
-              {
-                "color": "red",
-                "value": 5
               }
             ]
           },
-          "unit": "percent"
+          "unit": "decbytes"
         },
         "overrides": []
       },
@@ -1258,8 +1249,8 @@
             "type": "prometheus",
             "uid": "ff8wumiwg41dsc"
           },
-          "expr": "(sum(rate(prometheus_http_requests_total{code=~\"5..\"}[5m])) / sum(rate(prometheus_http_requests_total[5m]))) * 100",
-          "legendFormat": "5xx Error Rate",
+          "expr": "node_filesystem_size_bytes{job=\"node-exporter\"} - node_filesystem_avail_bytes{job=\"node-exporter\"}",
+          "legendFormat": "Used - {{device}} {{mountpoint}}",
           "refId": "A"
         },
         {
@@ -1267,12 +1258,12 @@
             "type": "prometheus",
             "uid": "ff8wumiwg41dsc"
           },
-          "expr": "(sum(rate(prometheus_http_requests_total{code=~\"4..\"}[5m])) / sum(rate(prometheus_http_requests_total[5m]))) * 100",
-          "legendFormat": "4xx Error Rate",
+          "expr": "node_filesystem_avail_bytes{job=\"node-exporter\"}",
+          "legendFormat": "Available - {{device}} {{mountpoint}}",
           "refId": "B"
         }
       ],
-      "title": "⚠️ HTTP Error Rate (%) - ALERTA se > 1%",
+      "title": "💾 Disco - Espaço Usado por Filesystem",
       "type": "timeseries"
     },
     {
@@ -1322,18 +1313,10 @@
               {
                 "color": "green",
                 "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 100
-              },
-              {
-                "color": "red",
-                "value": 500
               }
             ]
           },
-          "unit": "ms"
+          "unit": "Bps"
         },
         "overrides": []
       },
@@ -1370,7 +1353,7 @@
           "refId": "A"
         }
       ],
-      "title": "🗑️ OTEL Collector - GC Pauses (ms) - ALERTA se > 100ms",
+      "title": "📊 Disco - I/O Read/Write (bytes/s)",
       "type": "timeseries"
     },
     {
@@ -1420,18 +1403,10 @@
               {
                 "color": "green",
                 "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 200
-              },
-              {
-                "color": "red",
-                "value": 400
               }
             ]
           },
-          "unit": "mbytes"
+          "unit": "Bps"
         },
         "overrides": []
       },
@@ -1463,8 +1438,8 @@
             "type": "prometheus",
             "uid": "ff8wumiwg41dsc"
           },
-          "expr": "go_memstats_heap_alloc_bytes{job=\"prometheus\"} / 1024 / 1024",
-          "legendFormat": "Prometheus Heap Allocated",
+          "expr": "sum(rate(node_network_receive_bytes_total{job=\"node-exporter\",device!~\"lo|docker.*|veth.*\"}[5m])) by (device)",
+          "legendFormat": "Receive - {{device}}",
           "refId": "A"
         },
         {
@@ -1472,12 +1447,12 @@
             "type": "prometheus",
             "uid": "ff8wumiwg41dsc"
           },
-          "expr": "go_memstats_heap_sys_bytes{job=\"prometheus\"} / 1024 / 1024",
-          "legendFormat": "Prometheus Heap System",
+          "expr": "sum(rate(node_network_transmit_bytes_total{job=\"node-exporter\",device!~\"lo|docker.*|veth.*\"}[5m])) by (device)",
+          "legendFormat": "Transmit - {{device}}",
           "refId": "B"
         }
       ],
-      "title": "💾 OTEL Collector - Memória Heap (MB)",
+      "title": "🌐 Rede - Tráfego (bytes/s)",
       "type": "timeseries"
     },
     {
@@ -1530,11 +1505,11 @@
               },
               {
                 "color": "yellow",
-                "value": 100
+                "value": 10
               },
               {
                 "color": "red",
-                "value": 500
+                "value": 20
               }
             ]
           },
@@ -1570,12 +1545,21 @@
             "type": "prometheus",
             "uid": "ff8wumiwg41dsc"
           },
-          "expr": "go_sched_goroutines_goroutines{job=\"prometheus\"}",
-          "legendFormat": "Prometheus Goroutines",
+          "expr": "sum(pg_stat_activity_count{job=\"postgres-exporter\",state=\"active\",datname=~\"monitoring|pedegas\"}) by (datname)",
+          "legendFormat": "Active - {{datname}}",
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ff8wumiwg41dsc"
+          },
+          "expr": "sum(pg_stat_activity_count{job=\"postgres-exporter\",state=\"idle\",datname=~\"monitoring|pedegas\"}) by (datname)",
+          "legendFormat": "Idle - {{datname}}",
+          "refId": "B"
         }
       ],
-      "title": "🔄 OTEL Collector - Goroutines - ALERTA se > 500",
+      "title": "📊 PostgreSQL - Queries Ativas/Idle por Database",
       "type": "timeseries"
     },
     {
@@ -1954,21 +1938,12 @@
             "type": "prometheus",
             "uid": "ff8wumiwg41dsc"
           },
-          "expr": "sum(rate(go_gc_cycles_automatic_gc_cycles_total[5m])) by (job)",
-          "legendFormat": "Auto GC - {{job}}",
+          "expr": "(sum(rate(pg_stat_database_blks_hit{job=\"postgres-exporter\",datname=~\"monitoring|pedegas\"}[5m])) by (datname) / (sum(rate(pg_stat_database_blks_hit{job=\"postgres-exporter\",datname=~\"monitoring|pedegas\"}[5m])) by (datname) + sum(rate(pg_stat_database_blks_read{job=\"postgres-exporter\",datname=~\"monitoring|pedegas\"}[5m])) by (datname))) * 100",
+          "legendFormat": "Cache Hit Ratio - {{datname}}",
           "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "ff8wumiwg41dsc"
-          },
-          "expr": "sum(rate(go_gc_cycles_forced_gc_cycles_total[5m])) by (job)",
-          "legendFormat": "Forced GC - {{job}}",
-          "refId": "B"
         }
       ],
-      "title": "🗑️ OTEL Collector - GC Frequency (cycles/s)",
+      "title": "📊 PostgreSQL - Cache Hit Ratio",
       "type": "timeseries"
     },
     {
@@ -2031,7 +2006,7 @@
             "type": "prometheus",
             "uid": "ff8wumiwg41dsc"
           },
-          "expr": "pg_database_connection_limit",
+          "expr": "pg_database_connection_limit{job=\"postgres-exporter\",datname=~\"monitoring|pedegas\"}",
           "format": "table",
           "instant": true,
           "refId": "A"
@@ -2090,7 +2065,7 @@
               }
             ]
           },
-          "unit": "s"
+          "unit": "ops"
         },
         "overrides": []
       },
@@ -2122,12 +2097,30 @@
             "type": "prometheus",
             "uid": "ff8wumiwg41dsc"
           },
-          "expr": "pg_replication_lag_seconds{job=\"postgres-exporter\"}",
-          "legendFormat": "Replication Lag - {{datname}}",
+          "expr": "sum(rate(pg_stat_database_tup_inserted{job=\"postgres-exporter\",datname=~\"monitoring|pedegas\"}[5m])) by (datname)",
+          "legendFormat": "Inserted - {{datname}}",
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ff8wumiwg41dsc"
+          },
+          "expr": "sum(rate(pg_stat_database_tup_updated{job=\"postgres-exporter\",datname=~\"monitoring|pedegas\"}[5m])) by (datname)",
+          "legendFormat": "Updated - {{datname}}",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ff8wumiwg41dsc"
+          },
+          "expr": "sum(rate(pg_stat_database_tup_deleted{job=\"postgres-exporter\",datname=~\"monitoring|pedegas\"}[5m])) by (datname)",
+          "legendFormat": "Deleted - {{datname}}",
+          "refId": "C"
         }
       ],
-      "title": "🔄 PostgreSQL - Replication Lag (s) - Se > 0, há réplica",
+      "title": "📈 PostgreSQL - Tuples Inseridas/Atualizadas/Deletadas",
       "type": "timeseries"
     }
   ],
