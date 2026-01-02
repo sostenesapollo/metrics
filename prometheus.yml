@@ -17,9 +17,14 @@ scrape_configs:
     static_configs:
       - targets: ['otel-collector:8889']
   
-  - job_name: 'pedegas-3'
-    scrape_interval: 15s
-    static_configs:
-      - targets: ['localhost:3000']
-    metrics_path: '/metrics'
+  # Job do pedegas-3 comentado - as métricas são enviadas via OTLP para o otel-collector
+  # e aparecem no job 'otel-collector' acima
+  # - job_name: 'pedegas-3'
+  #   scrape_interval: 15s
+  #   static_configs:
+  #     - targets: ['pedegas-app:3000']  # Hostname DNS na rede coolify
+  #   metrics_path: '/metrics'
+  #   # Nota: O pedegas-3 envia métricas para o OpenTelemetry Collector via OTLP
+  #   # As métricas aparecem no job 'otel-collector' acima
+  #   # Este job só é necessário se o pedegas-3 expor um endpoint /metrics diretamente
 
